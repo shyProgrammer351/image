@@ -3,7 +3,7 @@ import java.awt.Dimension;
 import chat.ChatPanel;
 
 /**************
- * 채팅 프로그램의 GUI 버전
+ * 채팅 프로그램의 GUI 버전 Git Test
  * @author So Young Park
  * @version 0.8
  */	
