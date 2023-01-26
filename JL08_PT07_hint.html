@@ -1,0 +1,996 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<style>
+@charset "EUC-KR";
+      #container {
+        float: left;
+        width: 1800px;
+        margin: 0px auto;
+        border: 0px solid #bcbcbc;
+      }
+      #topBox {
+        float: left;
+        width: 850px;
+        display: block;
+        margin: 0px auto;
+        padding: 10px;
+        border: 0px solid #bcbcbc;
+      }
+      #centerBox {
+        clear: left;
+        width: 1500px;
+        display: inline-block;
+        cursor: Default;
+        margin: 0px auto;
+        padding: 10px;
+        border: 0px solid #bcbcbc;
+      }
+      #bottomBox {
+        clear: left;
+        width: 807px;
+        display: inline-block;
+        border: 0px solid #bcbcbc;
+      }
+      #codeBox {
+        clear: left;
+        width: auto;
+        display: block;
+        padding: 1px;
+        border: 0px solid #bcbcbc;
+      }
+      #floatingBox {
+        width: auto;
+        position : fixed;
+        left : 600px;
+        top: 50px;
+        height: 50px;
+        margin: 0px auto;
+        border: 0px solid #bcbcbc;
+      }
+      #outputBox {
+        background: black;
+        padding: 10px;
+        color: white;
+        border: 0px solid #bcbcbc;
+      }
+      .outputBox_invisible
+      {
+        height : 0px ; 
+        padding: 0px;
+        margin : 0px;
+      }
+      .outputBox_visible
+      {
+        height: 30px ; 
+        padding: 0px;
+        margin-top: 10px;
+        margin-left: 10px;
+      }
+      #intermediateResult {
+        padding: 5px;
+        min-height: 10px;
+        border: 0px solid #bcbcbc;
+      }
+      #imageBox{
+      }
+      #sequenceBox
+      {
+      }
+      #myCanvas{
+        position: absolute;
+        width : "200";
+        height : "100";
+      }
+      .unselectable
+      {
+        -webkit-user-select: none; 
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none; 
+        -o-user-select: none; 
+        user-select: none;
+      }
+      .green
+      {
+        color : #009900;
+      }
+      .codeClass
+      {
+        line-height: 150% ; 
+        margin-top : 5; 
+        margin-bottom : 5;
+        tab-size: 45px;
+        display: inline;
+      }
+</style>
+      
+
+
+<script>
+function initialize()
+{
+		var strOutput = "";
+		for ( var i = 0 ; i < info.length ; i++ )
+			strOutput  += info[ i ][ OUTPUT ];
+		var countLines = strOutput.split('\n').length - 1;
+
+		var outputBox = document.getElementById( "outputBox" );
+		outputBox.innerText    = strOutput;
+		outputBox.style.height = ( countLines + 3 ) * 14.5 + "px";
+		outputBox.style.width  = outputBox.offsetWidth + "px";
+		outputBox.style.color  = "White";
+		outputBox.innerText    = "";
+
+		if( strOutput.trim() == "" )
+		{
+				outputBox.style.width = 0;
+				outputBox.style.height = 0;	
+				outputBox.style.padding = 0;
+		}
+		
+		update_view( 0, 0 );
+}
+
+function getStyle( styleCode )
+{
+	if( styleCode == 'cbw' ) 
+		return 'border:5px solid SkyBlue;background:white;margin:0px;text-align:center';
+	else if( styleCode == 'cb' ) 
+		return 'border:5px solid SkyBlue;background:SkyBlue;margin:0px;text-align:center';
+	else if( styleCode == 'lbw' ) 
+		return 'border:5px solid SkyBlue;background:white;margin:0px;text-align:left';
+	else if( styleCode == 'lb' ) 
+		return 'border:5px solid SkyBlue;background:SkyBlue;margin:0px;text-align:left';
+	else if( styleCode == 'rb' ) 
+		return 'border:5px solid SkyBlue;background:SkyBlue;margin:0px;text-align:right';
+	else if( styleCode == 'cgw' ) 
+		return 'border:5px solid MediumSeaGreen;background:white;margin:0px;text-align:center';
+	else if( styleCode == 'cg' ) 
+		return 'border:5px solid MediumSeaGreen;background:MediumSeaGreen;margin:0px;text-align:center';
+	else if( styleCode == 'lgw' ) 
+		return 'border:5px solid MediumSeaGreen;background:white;margin:0px;text-align:left';
+	else if( styleCode == 'lg' ) 
+		return 'border:5px solid MediumSeaGreen;background:MediumSeaGreen;margin:0px;text-align:left';
+	else if( styleCode == 'rg' ) 
+		return 'border:5px solid MediumSeaGreen;background:MediumSeaGreen;margin:0px;text-align:right';
+	else if( styleCode == 'cow' ) 
+		return 'border:5px solid DarkOrange;background:white;margin:0px;text-align:center';
+	else if( styleCode == 'co' ) 
+		return 'border:5px solid DarkOrange;background:DarkOrange;margin:0px;text-align:center';
+	else if( styleCode == 'low' ) 
+		return 'border:5px solid DarkOrange;background:white;margin:0px;text-align:left';
+	else if( styleCode == 'lo' ) 
+		return 'border:5px solid DarkOrange;background:DarkOrange;margin:0px;text-align:left';
+	else if( styleCode == 'ro' ) 
+		return 'border:5px solid DarkOrange;background:DarkOrange;margin:0px;text-align:right';
+	else if( styleCode == 'cyw' ) 
+		return 'border:5px solid YellowGreen;background:white;margin:0px;text-align:center';
+	else if( styleCode == 'cy' ) 
+		return 'border:5px solid YellowGreen;background:YellowGreen;margin:0px;text-align:center';
+	else if( styleCode == 'lyw' ) 
+		return 'border:5px solid YellowGreen;background:white;margin:0px;text-align:left';
+	else if( styleCode == 'ly' ) 
+		return 'border:5px solid YellowGreen;background:YellowGreen;margin:0px;text-align:left';
+	else if( styleCode == 'ry' ) 
+		return 'border:5px solid YellowGreen;background:YellowGreen;margin:0px;text-align:right';
+	else
+		return 'border:5px solid #FFFFFF; background:white;margin:0px;text-align:left';
+}
+
+function delete_rows() 
+{
+	for( var variableTable = document.getElementById('variableTable');
+			 variableTable.rows.length > 0;
+			 variableTable.deleteRow(0) );
+}
+
+function insert_rows( imgIdx ) 
+{
+	var variableTable = document.getElementById( 'variableTable' );
+	for ( const line of info[ imgIdx ][ IMAGE ].split('\t') )	
+	{
+		var row = variableTable.insertRow( variableTable.rows.length ); 
+		for ( const pairOfVariableNameAndValue of line.split('$') )	
+		{
+			var pairOfStringAndStyle = pairOfVariableNameAndValue.split(':');
+			if ( pairOfStringAndStyle.length >= 2 )
+			{
+				var variableNameOrValue = pairOfStringAndStyle[0];
+				var styleCode = pairOfStringAndStyle[1];	
+
+				var cell = row.insertCell();
+				cell.innerHTML = "<pre style='margin:0;padding:0;'>" + variableNameOrValue + "</pre>";
+				cell.style = getStyle( styleCode );
+			}
+		}
+	}
+}
+
+function update_table( imgIdx ) 
+{
+	delete_rows(); 
+	insert_rows( imgIdx );
+}
+
+function update_image( currentTurn )
+{
+	var imgIdx = currentTurn;
+	for( ; ( imgIdx >= 0 ) && ( info[ imgIdx ][ IMAGE ].length < 1 ); imgIdx--);
+				
+	if ( ( imgIdx >= 0 ) && ( info[ imgIdx ][ IMAGE ].indexOf( "table\t" ) >= 0 ) ) 
+	{
+		document.getElementById( 'imageBox' ).width = 0;
+		update_table( imgIdx );
+	}
+	else if ( imgIdx >= 0 )
+	{
+		var imageBox = document.getElementById( 'imageBox' );
+		imageBox.src = "./img/" + info[ imgIdx ][ IMAGE ];
+		imageBox.width = imageBox.naturalWidth / 2;
+	}
+}
+
+function update_output( currentTurn )
+{
+	var strOutput = "";
+	for(var idx = 0 ; idx <= currentTurn ; idx++ )
+		strOutput += info[ idx ][ OUTPUT ];
+	document.getElementById( "outputBox" ).innerText = strOutput ;
+}
+
+function update_sequence( currentTurn )
+{
+	var strSequence = "";
+	for(var idx = 0 ; idx <= currentTurn ; idx++)
+		strSequence += info[ idx ][ SEQUENCE ] +" ";
+	document.getElementById( "sequenceBox" ).innerText = strSequence ;
+}
+
+function update_bg_color( id, mouseover )
+{
+	if( mouseover )
+		document.getElementById( id ).style.backgroundColor = "#BBBBBB";
+	else
+		document.getElementById( id ).style.backgroundColor = "white";
+}
+
+function move_floatingBox( codeId )
+{
+	 var focusedLine = document.getElementById( codeId );
+	 $('html, body').animate( { scrollTop : ( focusedLine.offsetTop - 200 ) }, 1 );
+	 var floatingBox = document.getElementById( "floatingBox" );
+	 floatingBox.setAttribute( "style", "top:" + focusedLine.offsetTop - ( document.body.clientHeight / 2 )  + "px; left:" + 800 + "px;");
+}
+
+const SEQUENCE = 0;
+const OUTPUT = 1;
+const IMAGE = 2;
+
+function update_view( currentTurn, previousTurn )
+{
+	update_image( currentTurn );
+	update_output( currentTurn );
+	update_sequence( currentTurn );
+
+	update_bg_color( "code" + info[ previousTurn][ SEQUENCE ], false );
+	update_bg_color( "code" + info[ currentTurn ][ SEQUENCE ], true );
+	move_floatingBox("code" + info[ currentTurn ][ SEQUENCE ]);
+}
+
+var timestamp = 0;
+function on_key_down() 
+{
+	 var keycode = event.keyCode;
+	 var previousTurn = timestamp;
+	 // pageUp / A
+	 if ( ( ( keycode == 33 ) || ( keycode == 65 ) ) && ( timestamp > 0 ) )
+	 {
+		timestamp--;
+		update_view( timestamp, previousTurn );
+	 }
+	 // pageDown / D
+	 else if ( ( ( keycode == 34  ) || ( keycode == 68 ) ) && ( timestamp < info.length ) )
+	 {
+		timestamp++;
+		update_view( timestamp, previousTurn );
+	 }
+}
+
+
+	var info = 
+		[
+[ "M1",	"",	"" ], 
+[ "M3",	"",	"" ], 
+[ "CN6",	"",	"" ], 
+[ "CN2",	"",	"" ], 
+[ "P1",	"",	"" ], 
+[ "P4",	"",	"SingleClient_0001.jpg" ], 
+[ "CN4",	"",	"" ], 
+[ "N1",	"",	"" ], 
+[ "N2",	"",	"" ], 
+[ "CN3",	"",	"" ], 
+[ "CN8",	"",	"" ], 
+[ "CN10",	"",	"" ], 
+[ "CN11",	"",	"SingleClient_0021.jpg" ], 
+[ "CN12",	"",	"" ], 
+[ "CN37",	"",	"" ], 
+[ "CN38",	"",	"SingleClient_00212.jpg" ], 
+[ "CN13",	"",	"" ], 
+[ "N9",	"",	"" ], 
+[ "N11",	"",	"" ], 
+[ "E001",	"",	"SingleClient_00213.jpg" ], 
+[ "N10",	"",	"" ], 
+[ "N12",	"",	"" ], 
+[ "CN26",	"",	"" ], 
+[ "CN27",	"",	"" ], 
+[ "N18",	"",	"" ], 
+[ "N19",	"",	"" ], 
+[ "N16",	"",	"" ], 
+[ "N17",	"",	"" ], 
+[ "N20",	"",	"" ], 
+[ "N22",	"",	"" ], 
+[ "N13",	"",	"" ], 
+[ "CN14",	"",	"" ], 
+[ "N25",	"",	"" ], 
+[ "N26",	"",	"" ], 
+[ "N16",	"",	"" ], 
+[ "N17",	"",	"" ], 
+[ "N27",	"",	"" ], 
+[ "N28",	"",	"" ], 
+[ "E002",	"",	"SingleClient_006.jpg" ], 
+[ "N29",	"",	"" ], 
+[ "CN15",	"",	"" ], 
+[ "CN9",	"",	"" ], 
+[ "M2",	"",	"" ], 
+[ "M4",	"",	"" ], 
+[ "E003",	"",	"SingleClient_00711.jpg" ], 
+[ "N21",	"",	"" ], 
+[ "N24",	"",	"" ], 
+[ "CN28",	"",	"" ], 
+[ "CN29",	"",	"" ], 
+[ "CN37",	"",	"" ], 
+[ "CN38",	"",	"SingleClient_007.jpg" ], 
+[ "CN33",	"",	"" ], 
+[ "CN35",	"",	"" ], 
+[ "CN27",	"",	"" ], 
+[ "N18",	"",	"" ], 
+[ "N19",	"",	"" ], 
+[ "N16",	"",	"" ], 
+[ "N17",	"",	"" ], 
+[ "N20",	"",	"" ], 
+[ "N22",	"",	"" ], 
+[ "E004",	"",	"SingleClient_008.jpg" ], 
+[ "CN20",	"",	"" ], 
+[ "CN21",	"",	"" ], 
+[ "CN22",	"",	"SingleClient_009.jpg" ], 
+[ "CN37",	"",	"" ], 
+[ "CN38",	"",	"SingleClient_0101.jpg" ], 
+[ "CN24",	"",	"" ], 
+[ "N25",	"",	"" ], 
+[ "N26",	"",	"" ], 
+[ "N16",	"",	"" ], 
+[ "N17",	"",	"" ], 
+[ "N27",	"",	"" ], 
+[ "N28",	"",	"" ], 
+[ "E005",	"",	"SingleClient_010.jpg" ], 
+[ "N29",	"",	"" ], 
+[ "CN25",	"",	"" ], 
+[ "E006",	"",	"SingleClient_011.jpg" ], 
+[ "CN39",	"",	"" ], 
+[ "CN40",	"",	"" ], 
+[ "N25",	"",	"" ], 
+[ "N26",	"",	"" ], 
+[ "N16",	"",	"" ], 
+[ "N17",	"",	"" ], 
+[ "N27",	"",	"" ], 
+[ "N28",	"",	"" ], 
+[ "E007",	"",	"SingleClient_0121.jpg" ], 
+[ "N29",	"",	"" ], 
+[ "CN41",	"",	"" ], 
+[ "N14",	"",	"" ], 
+[ "N15",	"",	"SingleClient_0122.jpg" ], 
+[ "CN42",	"",	"SingleClient_0123.jpg" ], 
+[ "M5",	"",	"" ],
+
+		];
+
+</script>
+
+<body onload='initialize();' onkeydown='on_key_down()'>	 
+
+<br>      
+<table cellpadding="0" cellspacing="0" width="807" border="0">
+	<tbody><tr>
+		<td width="807" align="center">
+			<font color="4532fe" size="4"><b>박코치의 Java 프로그래밍 </b></font>
+		</td>
+	</tr>
+</tbody></table>
+<br>
+
+<div id = "container">
+	<div id = "topBox">
+<br><b>1) 문제 </b> <br>
+<table table width= '807' border='0' cellpadding='10' style= 'table-layout:fixed; word-break:break-all' >
+	<tr>
+		<td height = 'auto' >
+<pre  style='white-space: normal ; line-height: 1.5'>
+멀티 클라이언트 채팅 프로그램에서 네트워크 클라이언트 부분의 문제입니다 이를 해결하는 다음 프로그램을 해석하세요 실행순서 및 메모리 상태는 키보드의 A(이전)및 D(다음)를 눌러 확인하세요  </pre>
+		</td>
+	</tr>
+</table>
+
+<br><b>2) 입출력 예제 </b><br><br>
+ 
+<br>
+<br><b>3) 알고리즘 </b><br>
+<table table width= '807' border='0' cellpadding='10' style= 'table-layout:fixed; word-break:break-all' >
+	<tr>
+		<td height = 'auto' >
+<pre  style='white-space: normal ; line-height: 1.5'>
+ &nbsp; &nbsp;네트워크 서버 연결 초기화
+<br> &nbsp; &nbsp;&nbsp; &nbsp;서버 소켓 연결
+<br> &nbsp; &nbsp;&nbsp; &nbsp;클라이언트에서 서버로 연결 요청시 연결 활성화
+<br> &nbsp; &nbsp;&nbsp; &nbsp;네트워크 입출력 연결 초기화
+<br> &nbsp; &nbsp;&nbsp; &nbsp;네트워크에 데이터가 도착할 때까지 대기 시작
+<br>
+<br> 채팅 프로그램의 네트워크 연결 초기화
+<br> &nbsp; &nbsp;네트워크 클라이언트 연결 초기화
+<br> &nbsp; &nbsp;&nbsp; &nbsp;클라이언트에서 서버로 연결 요청
+<br> &nbsp; &nbsp;&nbsp; &nbsp;네트워크 입출력 연결 초기화
+<br> &nbsp; &nbsp;&nbsp; &nbsp;네트워크에 데이터가 도착할 때까지 대기 시작
+<br>
+<br> 대화 내용 도착시 채팅 화면 업데이트
+<br> &nbsp; &nbsp;상대편이 네트워크로 보낸 대화 내용 읽기
+<br> &nbsp; &nbsp;채팅 화면에 해당 대화 내용 쓰기
+<br>
+<br> 대화 입력시 상대편에게 대화 내용 전송
+<br> &nbsp; &nbsp;참여자가 입력한 대화 내용 읽기
+<br> &nbsp; &nbsp;상대편에게 네트워크로 대화 내용 전송
+<br> &nbsp; &nbsp;상대편에게 네트워크로 데이터 전송
+<br>
+<br> 채팅 프로그램의 네트워크 연결 해제
+<br> &nbsp; &nbsp;상대편에게 네트워크로 프로그램 종료 알림
+<br> &nbsp; &nbsp;네트워크 연결 해제
+<br> </pre>
+		</td>
+	</tr>
+</table>
+
+<br><b>4) 프로그램 코드 </b> &nbsp; &nbsp; 
+<br>
+	</div>
+
+	<div id = "centerBox">
+		<div id = "codeBox">	 
+<pre id="code0" class="unselectable codeClass">	<font color="green">// 이벤트</font> 
+</pre>
+<pre id="codeE001" class="unselectable codeClass">E001		<font color="green">// [클라이언트]에서 [서버]로 접속요청하면 [서버]에서 네트워크 연결 초기화</font>  
+</pre>
+<pre id="codeE002" class="unselectable codeClass">E002		<font color="green">// [클라이언트]에서 [서버]로 메시지([CHAT] [클라이언트]님이 들어오셨습니다) 전송</font> 
+</pre>
+<pre id="codeE003" class="unselectable codeClass">E003		<font color="green">// [클라이언트]에게 [서버]에서 보낸 메시지([CHAT] [서버]안녕하세요) 도착</font> 
+</pre>
+<pre id="codeE004" class="unselectable codeClass">E004		<font color="green">// [클라이언트]에서 메시지([CHAT] [클라이언트]반갑습니다) 입력</font> 
+</pre>
+<pre id="codeE005" class="unselectable codeClass">E005		<font color="green">// [클라이언트]에서 [서버]로 메시지([CHAT] [클라이언트]반갑습니다) 전송</font> 
+</pre>
+<pre id="codeE006" class="unselectable codeClass">E006		<font color="green">// [클라이언트]에서 프로그램 닫기(우측상단 X) 선택</font>   
+</pre>
+<pre id="codeE007" class="unselectable codeClass">E007		<font color="green">// [클라이언트]에서 [서버]로 메시지([CHAT] [클라이언트]님이 나가셨습니다) 전송</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">	<font color="green">// 파일명 : ./Chapter08/ChatClient.java</font> 
+</pre><pre id="code0" class="unselectable codeClass">	import javax.swing.JFrame; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.awt.Dimension; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.awt.event.WindowAdapter; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.awt.event.WindowEvent; 
+</pre><pre id="code0" class="unselectable codeClass">	import chat.ChatNetwork; 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">	<font color="green">/************** </font>
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* 채팅 프로그램의 네트워크 클라이언트 버전</font>  
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @author So Young Park</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @version 0.8</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">	public class ChatClient 
+</pre><pre id="code0" class="unselectable codeClass">	{ 
+</pre>
+<pre id="codeM1" class="unselectable codeClass">M1		public static void main(String[] args)  
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			String serverIP = "localhost"; 
+</pre>
+<pre id="codeM2" class="unselectable codeClass">M2			ChatNetwork panel =  
+</pre>
+<pre id="codeM3" class="unselectable codeClass">M3			                     new ChatNetwork( serverIP ); 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">			JFrame frame = new JFrame( "채팅" ); 
+</pre><pre id="code0" class="unselectable codeClass">			frame.getContentPane().add( panel ); 
+</pre><pre id="code0" class="unselectable codeClass">			frame.addWindowListener( new WindowAdapter() { 
+</pre><pre id="code0" class="unselectable codeClass">				public void <font color="red" title="JFrame에 있는 종료(X) 버튼을 클릭하면 호출되어 실행하는 메서드">windowClosing</font>( WindowEvent e ) {  
+</pre><pre id="code0" class="unselectable codeClass">					panel.close(); 
+</pre><pre id="code0" class="unselectable codeClass">				} 
+</pre><pre id="code0" class="unselectable codeClass">			} ); 
+</pre><pre id="code0" class="unselectable codeClass">			frame.setPreferredSize( new Dimension( 320, 445 ) );	 
+</pre><pre id="code0" class="unselectable codeClass">			frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE ); 
+</pre><pre id="code0" class="unselectable codeClass">			frame.pack(); 
+</pre><pre id="code0" class="unselectable codeClass">			frame.setVisible(true); 
+</pre>
+<pre id="codeM4" class="unselectable codeClass">M4			<font color="green">// 이벤트 발생시 처리 준비중</font> 
+</pre>
+<pre id="codeM5" class="unselectable codeClass">M5		} 
+</pre><pre id="code0" class="unselectable codeClass">	} 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">	<font color="green">// 파일명 : ./Common/chat/ChatNetwork.java</font> 
+</pre><pre id="code0" class="unselectable codeClass">	package chat; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.awt.event.*; 
+</pre><pre id="code0" class="unselectable codeClass">	import javax.swing.JOptionPane; 
+</pre><pre id="code0" class="unselectable codeClass">	import network.Network; 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">	<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* 채팅 프로그램의 네트워크 담당 클래스</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @author So Young Park</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @version 0.8</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @see     net.Network()</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">	public class ChatNetwork extends ChatPanel implements Runnable 
+</pre><pre id="code0" class="unselectable codeClass">	{	 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 네트워크</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		private Network network; 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 채팅 참여자 아이디</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		private String  id; 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 채팅 프로그램의 메시지 헤더</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		private final String header = "[CHAT] "; 
+</pre><pre id="code0" class="unselectable codeClass">			 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* <b>채팅 프로그램의 네트워크 연결 초기화  </b></font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @param serverIP 서버 IP 주소</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeCN6" class="unselectable codeClass">CN6		public ChatNetwork( String serverIP ) 
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre>
+<pre id="codeCN2" class="unselectable codeClass">CN2			super(); 
+</pre>
+<pre id="codeCN10" class="unselectable codeClass">CN10			id = "[" + JOptionPane.showInputDialog( this, "아이디를 입력해주세요.", "아이디" ) + "]"; 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre>
+<pre id="codeCN3" class="unselectable codeClass">CN3			network =  
+</pre>
+<pre id="codeCN4" class="unselectable codeClass">CN4			          new Network(); 
+</pre>
+<pre id="codeCN13" class="unselectable codeClass">CN13			network.connectAsClient( serverIP, this ); 
+</pre>
+<pre id="codeCN14" class="unselectable codeClass">CN14			network.write( header + id + "님이 들어오셨습니다" ); 
+</pre>
+<pre id="codeCN9" class="unselectable codeClass">CN9		} 
+</pre><pre id="code0" class="unselectable codeClass">			 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* <b>대화 입력시 상대편에게 대화 내용 전송 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @param event 대화 입력 결과</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre><pre id="code0" class="unselectable codeClass">		@Override 
+</pre>
+<pre id="codeCN20" class="unselectable codeClass">CN20		public void actionPerformed( ActionEvent event ) 
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">//<b> 참여자가 입력한 대화 내용 읽기 </b></font>
+</pre>
+<pre id="codeCN21" class="unselectable codeClass">CN21			String message = inputField.getText();			                  
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">//<b> 상대편에게 네트워크로 대화 내용 전송 </b></font>
+</pre>
+<pre id="codeCN24" class="unselectable codeClass">CN24			network.write( header + id + message );   
+</pre>
+<pre id="codeCN22" class="unselectable codeClass">CN22			inputField.setText( "" ); 
+</pre>
+<pre id="codeCN25" class="unselectable codeClass">CN25		} 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* <b>대화 내용 도착시 채팅 화면 업데이트 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre><pre id="code0" class="unselectable codeClass">		@Override 
+</pre>
+<pre id="codeCN26" class="unselectable codeClass">CN26		public void <font color="red" title="스레드의 start 메서드에서 호출하며 실질적으로 스레드 작업을 수행">run</font>()  
+</pre><pre id="code0" class="unselectable codeClass">		{	 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">//<b> 상대편이 네트워크로 보낸 대화 내용 읽기 </b></font>
+</pre>
+<pre id="codeCN27" class="unselectable codeClass">CN27			for ( String message = null; ( message = network.read() ) 
+</pre>
+<pre id="codeCN28" class="unselectable codeClass">CN28			                                                          != null; )  
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">// 채팅 프로그램 대화 내용이 아니면 메시지 무시</font> 
+</pre>
+<pre id="codeCN29" class="unselectable codeClass">CN29				if ( !message.contains( header ) ) 
+</pre>
+<pre id="codeCN31" class="unselectable codeClass">CN31					continue; 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">//<b> 채팅 화면에 해당 대화 내용 쓰기 </b></font>
+</pre>
+<pre id="codeCN37" class="unselectable codeClass">CN37				chatWindow.append( message.substring( header.length() ) + "\n" ); 
+</pre>
+<pre id="codeCN38" class="unselectable codeClass">CN38				chatWindow.setCaretPosition( chatWindow.getText().length() );				 
+</pre>
+<pre id="codeCN35" class="unselectable codeClass">CN35			}   
+</pre>
+<pre id="codeCN36" class="unselectable codeClass">CN36		} 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* <b>채팅 프로그램의 네트워크 연결 해제 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeCN39" class="unselectable codeClass">CN39		public void close()  
+</pre><pre id="code0" class="unselectable codeClass">	   	{ 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">//<b> 상대편에게 네트워크로 프로그램 종료 알림 </b></font>
+</pre>
+<pre id="codeCN40" class="unselectable codeClass">CN40			network.write( header + " " + id + "님이 나가셨습니다" ); 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">// 네트워크 연결 해제</font> 
+</pre>
+<pre id="codeCN41" class="unselectable codeClass">CN41			network.disconnect(); 
+</pre>
+<pre id="codeCN42" class="unselectable codeClass">CN42		} 
+</pre><pre id="code0" class="unselectable codeClass">	} 
+</pre><pre id="code0" class="unselectable codeClass"> 
+</pre><pre id="code0" class="unselectable codeClass">	<font color="green">// 파일명 : ./Common/network/Network.java</font> 
+</pre><pre id="code0" class="unselectable codeClass">	package network; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.io.BufferedReader; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.io.InputStreamReader; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.io.PrintWriter; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.net.<font color="red" title="서버에서 네트워크를 개설하기 위한 소켓">ServerSocket</font>; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.net.<font color="red" title="서버-클라이언트를 1:1로 연결하기 위한 네트워크 소켓">Socket</font>; 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">	<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* 네트워크 연결 및 입출력 전용 클래스</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @author So Young Park</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @version 0.8</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">*/</font> 
+</pre><pre id="code0" class="unselectable codeClass">	public class Network  
+</pre><pre id="code0" class="unselectable codeClass">	{ 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 서버 포트 번호</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		protected int serverPort; 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 서버로 네트워크를 개설하기 위한 소켓</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		protected <font color="red" title="서버에서 네트워크를 개설하기 위한 소켓">ServerSocket</font> serverSocket;  
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 서버-클라이언트를 1:1로 연결하기 위한 네트워크 소켓</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		protected <font color="red" title="서버-클라이언트를 1:1로 연결하기 위한 네트워크 소켓">Socket</font> socket;  
+</pre><pre id="code0" class="unselectable codeClass">		 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 네트워크에서 데이터를 읽기 위한 객체</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		private BufferedReader in; 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 네트워크에 데이터를 쓰기 위한 객체</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		private PrintWriter out;  
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/**  </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 네트워크에 상대편의 데이터가 도착할 때까지 계속 대기하고 있다가 데이터가 도착하면 활성화되는 스레드이며, 메인 스레드와 별개로 작동</font>   
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font>	 
+</pre><pre id="code0" class="unselectable codeClass">		private <font color="red" title="메인 스레드와 별개로 작동할 수 있는 작업단위">Thread</font> waitForCounterpart;  
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 네트워크 클래스 초기화</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeN1" class="unselectable codeClass">N1		public Network() 
+</pre><pre id="code0" class="unselectable codeClass">		{	 
+</pre><pre id="code0" class="unselectable codeClass">			serverPort = 7700; 
+</pre><pre id="code0" class="unselectable codeClass">			serverSocket = null; 
+</pre><pre id="code0" class="unselectable codeClass">			socket = null; 
+</pre><pre id="code0" class="unselectable codeClass">			in = null; 
+</pre><pre id="code0" class="unselectable codeClass">			out = null; 
+</pre><pre id="code0" class="unselectable codeClass">			waitForCounterpart = null; 
+</pre>
+<pre id="codeN2" class="unselectable codeClass">N2		} 
+</pre><pre id="code0" class="unselectable codeClass">		 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* <b>네트워크 서버 연결 초기화 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @param obj 네트워크에 데이터 도착시 데이터 처리 담당 객체</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeN3" class="unselectable codeClass">N3		public void connectAsServer( <font color="red" title="스레드에서 run 메서드를 호출할 수 있도록 지원하는 인터페이스">Runnable</font> obj )   
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			try  
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">//<b> 서버 소켓 연결 </b></font>
+</pre>
+<pre id="codeN4" class="unselectable codeClass">N4				serverSocket = new <font color="red" title="서버에서 네트워크를 개설하기 위한 소켓">ServerSocket</font>( serverPort );  
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">//<b> 클라이언트에서 서버로 연결 요청시 연결 활성화 </b></font>
+</pre>
+<pre id="codeN5" class="unselectable codeClass">N5				socket =  
+</pre>
+<pre id="codeN6" class="unselectable codeClass">N6				         serverSocket.<font color="red" title="클라이언트에서 서버로 연결 요청시 이를 받아들여 연결 활성화">accept</font>();    
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">//<b> 네트워크 입출력 연결 초기화 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">				in = new BufferedReader( new InputStreamReader( socket.getInputStream() ) ); 
+</pre><pre id="code0" class="unselectable codeClass">				out = new PrintWriter( socket.getOutputStream(), true ); 
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">//<b> 네트워크에 데이터가 도착할 때까지 대기 시작 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">				waitForCounterpart = new <font color="red" title="메인 스레드와 별개로 작동할 수 있는 작업단위">Thread</font>( obj );  
+</pre>
+<pre id="codeN7" class="unselectable codeClass">N7				waitForCounterpart.<font color="red" title="스레드를 시작하는 메서드">start</font>();   
+</pre><pre id="code0" class="unselectable codeClass">			} 
+</pre><pre id="code0" class="unselectable codeClass">			catch ( Exception e ) 
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				e.printStackTrace(); 
+</pre><pre id="code0" class="unselectable codeClass">			} 
+</pre>
+<pre id="codeN8" class="unselectable codeClass">N8		}  
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* <b>네트워크 클라이언트 연결 초기화   </b></font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @param serverIP 서버 IP 주소</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @param obj 네트워크에 데이터 도착시 데이터 처리 담당 객체</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeN9" class="unselectable codeClass">N9		public void connectAsClient( String serverIP, <font color="red" title="스레드에서 run 메서드를 호출할 수 있도록 지원하는 인터페이스">Runnable</font> obj )   
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			try  
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">//<b> 클라이언트에서 서버로 연결 요청  </b></font>
+</pre>
+<pre id="codeN10" class="unselectable codeClass">N10				socket =  
+</pre>
+<pre id="codeN11" class="unselectable codeClass">N11				         new <font color="red" title="서버-클라이언트를 1:1로 연결하기 위한 네트워크 소켓">Socket</font>( serverIP, serverPort );  
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">//<b> 네트워크 입출력 연결 초기화 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">				in = new BufferedReader( new InputStreamReader( socket.getInputStream() )); 
+</pre><pre id="code0" class="unselectable codeClass">				out = new PrintWriter( socket.getOutputStream(), true ); 
+</pre><pre id="code0" class="unselectable codeClass">				<font color="green">//<b> 네트워크에 데이터가 도착할 때까지 대기 시작  </b></font>
+</pre><pre id="code0" class="unselectable codeClass">				waitForCounterpart = new <font color="red" title="메인 스레드와 별개로 작동할 수 있는 작업단위">Thread</font>( obj );  
+</pre>
+<pre id="codeN12" class="unselectable codeClass">N12				waitForCounterpart.<font color="red" title="스레드를 시작하는 메서드">start</font>();	 
+</pre><pre id="code0" class="unselectable codeClass">			}  
+</pre><pre id="code0" class="unselectable codeClass">			catch ( Exception e ) 
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				e.printStackTrace(); 
+</pre><pre id="code0" class="unselectable codeClass">			} 
+</pre>
+<pre id="codeN13" class="unselectable codeClass">N13		} 
+</pre><pre id="code0" class="unselectable codeClass">		 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 상대편이 네트워크로 보낸 데이터 읽기</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @return 네트워크에 도착한 데이터</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeN18" class="unselectable codeClass">N18		public String read()  
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			try  
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre>
+<pre id="codeN19" class="unselectable codeClass">N19				if ( this.isConnecting()  
+</pre>
+<pre id="codeN20" class="unselectable codeClass">N20				                         == true ) 
+</pre>
+<pre id="codeN21" class="unselectable codeClass">N21					return  
+</pre>
+<pre id="codeN22" class="unselectable codeClass">N22					       in.readLine(); 
+</pre><pre id="code0" class="unselectable codeClass">			}  
+</pre><pre id="code0" class="unselectable codeClass">			catch ( Exception e ) 
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				e.printStackTrace(); 
+</pre><pre id="code0" class="unselectable codeClass">			} 
+</pre><pre id="code0" class="unselectable codeClass">			 
+</pre>
+<pre id="codeN23" class="unselectable codeClass">N23			return null; 
+</pre>
+<pre id="codeN24" class="unselectable codeClass">N24		} 
+</pre><pre id="code0" class="unselectable codeClass">		 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* <b>상대편에게 네트워크로 데이터 전송 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @param data 네트워크에 보낼 데이터</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeN25" class="unselectable codeClass">N25		public void write( String data )  
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			try  
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre>
+<pre id="codeN26" class="unselectable codeClass">N26				if ( this.isConnecting()  
+</pre>
+<pre id="codeN27" class="unselectable codeClass">N27				                         == true ) 
+</pre>
+<pre id="codeN28" class="unselectable codeClass">N28					out.println( data ); 
+</pre><pre id="code0" class="unselectable codeClass">			}  
+</pre><pre id="code0" class="unselectable codeClass">			catch ( Exception e ) 
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				e.printStackTrace(); 
+</pre><pre id="code0" class="unselectable codeClass">			}	 
+</pre>
+<pre id="codeN29" class="unselectable codeClass">N29		} 
+</pre><pre id="code0" class="unselectable codeClass">		 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* <b>네트워크 연결 해제 </b></font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeN14" class="unselectable codeClass">N14		public void disconnect()  
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			try  
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				if( waitForCounterpart != null ) 
+</pre><pre id="code0" class="unselectable codeClass">				{ 
+</pre><pre id="code0" class="unselectable codeClass">					waitForCounterpart.<font color="red" title="스레드를 중단하는 메서드">interrupt</font>();	   
+</pre><pre id="code0" class="unselectable codeClass">					waitForCounterpart = null; 
+</pre><pre id="code0" class="unselectable codeClass">				} 
+</pre><pre id="code0" class="unselectable codeClass">				if( in != null ) 
+</pre><pre id="code0" class="unselectable codeClass">				{ 
+</pre><pre id="code0" class="unselectable codeClass">					in.close(); 
+</pre><pre id="code0" class="unselectable codeClass">					in=null; 
+</pre><pre id="code0" class="unselectable codeClass">				}			 
+</pre><pre id="code0" class="unselectable codeClass">				if( out != null ) 
+</pre><pre id="code0" class="unselectable codeClass">				{ 
+</pre><pre id="code0" class="unselectable codeClass">					out.flush(); 
+</pre><pre id="code0" class="unselectable codeClass">					out.close(); 
+</pre><pre id="code0" class="unselectable codeClass">					out = null; 
+</pre><pre id="code0" class="unselectable codeClass">				} 
+</pre><pre id="code0" class="unselectable codeClass">				if( socket != null ) 
+</pre><pre id="code0" class="unselectable codeClass">				{ 
+</pre><pre id="code0" class="unselectable codeClass">					socket.close(); 
+</pre><pre id="code0" class="unselectable codeClass">					socket = null; 
+</pre><pre id="code0" class="unselectable codeClass">				} 
+</pre><pre id="code0" class="unselectable codeClass">				if( serverSocket != null ) 
+</pre><pre id="code0" class="unselectable codeClass">				{ 
+</pre><pre id="code0" class="unselectable codeClass">					serverSocket.close(); 
+</pre><pre id="code0" class="unselectable codeClass">					serverSocket = null; 
+</pre><pre id="code0" class="unselectable codeClass">				} 
+</pre><pre id="code0" class="unselectable codeClass">			}  
+</pre><pre id="code0" class="unselectable codeClass">			catch ( Exception e ) 
+</pre><pre id="code0" class="unselectable codeClass">			{ 
+</pre><pre id="code0" class="unselectable codeClass">				e.printStackTrace(); 
+</pre><pre id="code0" class="unselectable codeClass">			} 
+</pre>
+<pre id="codeN15" class="unselectable codeClass">N15		} 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 네트워크 연결 상태 확인</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @return 네트워크 연결중이면 true 아니면 false</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeN16" class="unselectable codeClass">N16		public boolean isConnecting()  
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			if ( ( socket != null )  
+</pre><pre id="code0" class="unselectable codeClass">					&& ( in != null )  
+</pre><pre id="code0" class="unselectable codeClass">					&& ( out != null )  
+</pre><pre id="code0" class="unselectable codeClass">					&& ( waitForCounterpart != null )  
+</pre><pre id="code0" class="unselectable codeClass">					&& ( waitForCounterpart.getState() != <font color="red" title="메인 스레드와 별개로 작동할 수 있는 작업단위">Thread</font>.State.TERMINATED ) )    
+</pre><pre id="code0" class="unselectable codeClass">				return true; 
+</pre><pre id="code0" class="unselectable codeClass">			else 
+</pre><pre id="code0" class="unselectable codeClass">				return false; 
+</pre>
+<pre id="codeN17" class="unselectable codeClass">N17		} 
+</pre><pre id="code0" class="unselectable codeClass">	} 
+</pre><pre id="code0" class="unselectable codeClass"> 
+</pre><pre id="code0" class="unselectable codeClass">	<font color="green">// 파일명 : ./Common/chat/ChatPanel.java</font> 
+</pre><pre id="code0" class="unselectable codeClass">	package chat; 
+</pre><pre id="code0" class="unselectable codeClass">	import javax.swing.*; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.awt.*; 
+</pre><pre id="code0" class="unselectable codeClass">	import java.awt.event.*; 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">	<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* 채팅 GUI 화면 관리 클래스</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @author So Young Park</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">* @version 0.8</font> 
+</pre><pre id="code0" class="unselectable codeClass">	 <font color="green">*/</font> 
+</pre><pre id="code0" class="unselectable codeClass">	public class ChatPanel extends JPanel implements ActionListener  
+</pre><pre id="code0" class="unselectable codeClass">	{ 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 채팅창</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre><pre id="code0" class="unselectable codeClass">		protected JTextArea  chatWindow; 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 대화 입력창</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre><pre id="code0" class="unselectable codeClass">		protected JTextField inputField; 
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 채팅 GUI 화면 초기화</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre>
+<pre id="codeP1" class="unselectable codeClass">P1		public ChatPanel()  
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">// 채팅창 초기화</font>  
+</pre><pre id="code0" class="unselectable codeClass">			chatWindow = new JTextArea(); 
+</pre><pre id="code0" class="unselectable codeClass">			chatWindow.setBackground( Color.lightGray ); 
+</pre><pre id="code0" class="unselectable codeClass">			chatWindow.setEditable( false ); 		 
+</pre>
+<pre id="codeP2" class="unselectable codeClass">P2			chatWindow.setLineWrap( true ); 
+</pre><pre id="code0" class="unselectable codeClass"> 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">// 채팅창이 길어지면 스크롤 활성화</font>  
+</pre><pre id="code0" class="unselectable codeClass">			JScrollPane scroll = new JScrollPane( chatWindow ); 
+</pre><pre id="code0" class="unselectable codeClass">			scroll.setPreferredSize( new Dimension( 290, 360 ) );	 
+</pre>
+<pre id="codeP3" class="unselectable codeClass">P3			add( scroll ); 
+</pre><pre id="code0" class="unselectable codeClass"> 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">// 입력창 초기화</font>  
+</pre><pre id="code0" class="unselectable codeClass">			inputField = new JTextField(); 
+</pre><pre id="code0" class="unselectable codeClass">			inputField.setPreferredSize( new Dimension( 290, 30 ) );		 
+</pre><pre id="code0" class="unselectable codeClass">			inputField.addActionListener( this );	 
+</pre><pre id="code0" class="unselectable codeClass">			inputField.requestFocus();  
+</pre><pre id="code0" class="unselectable codeClass">			add( inputField ); 
+</pre><pre id="code0" class="unselectable codeClass">			 
+</pre><pre id="code0" class="unselectable codeClass">			setVisible( true ); 
+</pre>
+<pre id="codeP4" class="unselectable codeClass">P4		}  
+</pre><pre id="code0" class="unselectable codeClass">	 
+</pre><pre id="code0" class="unselectable codeClass">		<font color="green">/** </font>
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* 사용자가 대화를 입력시 채팅 상황 업데이트</font>  
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @param ActionEvent e : 이벤트</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">* @return 없음</font> 
+</pre><pre id="code0" class="unselectable codeClass">		 <font color="green">*/</font> 
+</pre><pre id="code0" class="unselectable codeClass">		@Override 
+</pre>
+<pre id="codeP5" class="unselectable codeClass">P5		public void actionPerformed( ActionEvent e ) 
+</pre><pre id="code0" class="unselectable codeClass">		{ 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">// 대화 입력 내용을 가져오기</font>  
+</pre><pre id="code0" class="unselectable codeClass">			String userUtterance = inputField.getText(); 
+</pre>
+<pre id="codeP6" class="unselectable codeClass">P6			inputField.setText( "" ); 
+</pre><pre id="code0" class="unselectable codeClass">			<font color="green">// 대화 입력 내용을 채팅창에 출력</font>  
+</pre><pre id="code0" class="unselectable codeClass">			chatWindow.append( "[사용자] " + userUtterance + "\n" ); 
+</pre><pre id="code0" class="unselectable codeClass">			chatWindow.setCaretPosition( chatWindow.getText().length() ); 
+</pre>
+<pre id="codeP7" class="unselectable codeClass">P7		} 
+</pre><pre id="code0" class="unselectable codeClass">	} 
+</pre>
+ 
+		</div>	
+		<div id = "floatingBox">
+			<pre id = "outputBox" class ="outputBox"></pre>		
+			<div id = "intermediateResult">
+				<img id = "imageBox">
+				<table style = "border-spacing:0px;margin:0px;">
+				  <tbody id = "variableTable"></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div id = "bottomBox">
+		<div id = "keyword">
+			<span style="font-weight: bold"><br>5) 키워드 설명</span>
+			<pre style='line-height: 1.5;'>
+·<font color="red">windowClosing </font>
+ &nbsp;JFrame에 있는 종료(X) 버튼을 클릭하면 호출되어 실행하는 메서드
+
+·<font color="red">Runnable </font>
+ &nbsp;스레드에서 run 메서드를 호출할 수 있도록 지원하는 인터페이스
+
+·<font color="red">run </font>
+ &nbsp;스레드의 start 메서드에서 Runnable 객체의 run 메서드를 호출하며, run 메서드에서 실질적으로 스레드 작업을 수행 <br>&nbsp; public void run() Runnable 인터페이스를 상속받은 객체에 메서드 정의
+
+·<font color="red">ServerSocket </font>
+ &nbsp;서버에서 네트워크를 개설하기 위한 소켓
+
+·<font color="red">Socket </font>
+ &nbsp;특정 IP주소와 포트번호의 서버에 클라이언트가 연결 요청하면 서버는 수락하고 <BR> 서버-클라이언트를 1:1로 연결하기 위한 네트워크 소켓
+
+·<font color="red">Thread </font>
+ &nbsp;메인 스레드와 별개로 작동하며, 네트워크에 상대편의 데이터가 도착할 때까지 계속 대기하고 있다가 데이터가 도착하면 활성화되는 스레드 <br>&nbsp; public class Thread extends Object implements Runnable <br>&nbsp; 생성자는 Thread(), Thread( Runnable 객체 ) 등이 가능
+
+·<font color="red">accept </font>
+ &nbsp;클라이언트에서 서버로 연결 요청시 이를 받아들여 연결 활성화  <br>&nbsp; public Socket accept()에서 반환값은 클라이언트와 1:1로 연결된 소켓
+
+·<font color="red">start </font>
+ &nbsp;스레드를 시작하는 메서드
+
+·<font color="red">interrupt </font>
+ &nbsp;스레드를 중단하는 메서드
+
+·<font color="red">WindowListener </font>
+ &nbsp;윈도우 창에 이벤트가 발생하면 windowClosing 등의 관련 메서드를 호출할 수 있도록 지원하는 인터페이스
+
+
+			</pre>
+		</div>
+		<div id = "sequence">
+			<span style="font-weight: bold"><br>6) 실행 순서</span>
+			<pre id = "sequenceBox" class="unselectable" style='white-space:normal; line-height: 1.5;'> </pre>
+		</div>
+	</div>
+</div>
+
+</body>
+</html>
+
